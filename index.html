@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#e50914">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="HP67 Aufträge">
+  <title>HP67 AuftragsApp V2</title>
+  <style>
+    :root{
+      --bg:#f3f4f8;
+      --paper:#ffffff;
+      --ink:#111116;
+      --muted:#6f7280;
+      --line:#e2e4ec;
+      --red:#e50914;
+      --red2:#ff303d;
+      --dark:#111116;
+      --yellow:#ffd400;
+      --green:#02a86f;
+      --blue:#2d6bff;
+      --orange:#ff8a00;
+      --purple:#7c3cff;
+      --radius:22px;
+      --shadow:0 18px 45px rgba(17,17,22,.10);
+      --soft:0 8px 22px rgba(17,17,22,.07);
+      --safe:env(safe-area-inset-bottom,0px);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+    body{padding-bottom:calc(92px + var(--safe));}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .app{max-width:1100px;margin:0 auto;min-height:100vh}
+    .hero{
+      position:sticky;top:0;z-index:50;color:#fff;
+      background:
+        radial-gradient(circle at 88% 12%, rgba(255,212,0,.95) 0 8%, transparent 9% 24%),
+        radial-gradient(circle at 20% -10%, rgba(255,255,255,.30), transparent 30%),
+        linear-gradient(135deg,#111116 0%,#191921 48%,#e50914 49%,#ff303d 100%);
+      padding:18px 15px 15px;border-bottom-left-radius:30px;border-bottom-right-radius:30px;
+      box-shadow:0 16px 42px rgba(0,0,0,.22);
+    }
+    .heroTop{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;gap:12px;align-items:center;min-width:0}
+    .mark{
+      width:54px;height:54px;border-radius:18px;display:grid;place-items:center;flex:0 0 auto;
+      background:#fff;color:#111;font-weight:1000;border:4px solid var(--yellow);box-shadow:0 9px 22px rgba(0,0,0,.28);
+      letter-spacing:-1px;
+    }
+    .brand h1{font-size:21px;line-height:1.05;margin:0;font-weight:1000;letter-spacing:-.5px}
+    .brand p{font-size:12px;margin:4px 0 0;opacity:.86;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:67vw}
+    .datepill{
+      background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);
+      border-radius:999px;padding:9px 11px;font-size:12px;font-weight:900;white-space:nowrap;backdrop-filter:blur(8px)
+    }
+    .quickbar{display:grid;grid-template-columns:1fr auto;gap:9px;margin-top:14px}
+    .quickbar input{
+      border:0;background:#fff;color:#111;height:48px;border-radius:17px;padding:0 14px;outline:none;font-weight:650;
+      box-shadow:0 7px 18px rgba(0,0,0,.14)
+    }
+    .quickbar button{
+      border:0;background:var(--yellow);color:#111;height:48px;border-radius:17px;padding:0 15px;font-weight:1000;
+      box-shadow:0 7px 18px rgba(0,0,0,.12)
+    }
+    .screen{display:none;padding:16px;animation:pop .14s ease}
+    .screen.active{display:block}
+    @keyframes pop{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:none}}
+    .sectionHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 11px}
+    .sectionHead h2{margin:0;font-size:20px;font-weight:1000;letter-spacing:-.3px}
+    .sectionHead small{display:block;color:var(--muted);font-size:12px;margin-top:2px;font-weight:650}
+    .grid{display:grid;gap:12px}
+    .grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid3{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid4{grid-template-columns:repeat(2,minmax(0,1fr))}
+    @media(min-width:780px){
+      .grid3{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .grid4{grid-template-columns:repeat(4,minmax(0,1fr))}
+      .twoCols{grid-template-columns:1.15fr .85fr}
+    }
+    .card{
+      background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+      box-shadow:var(--soft);padding:15px;
+    }
+    .stat{
+      min-height:104px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;
+      border:0;color:#fff;
+    }
+    .stat:after{content:"";position:absolute;right:-28px;bottom:-36px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.18)}
+    .stat b{font-size:33px;line-height:1;font-weight:1000;position:relative;z-index:1}
+    .stat span{font-size:12px;font-weight:900;opacity:.95;position:relative;z-index:1}
+    .stat.red{background:linear-gradient(135deg,#e50914,#ff4c55)}
+    .stat.green{background:linear-gradient(135deg,#018758,#02c581)}
+    .stat.orange{background:linear-gradient(135deg,#ff7a00,#ffb000)}
+    .stat.blue{background:linear-gradient(135deg,#1f54ff,#38a0ff)}
+    .stat.dark{background:linear-gradient(135deg,#111116,#373743)}
+    .btn{
+      border:0;border-radius:16px;padding:12px 14px;min-height:46px;background:#111116;color:#fff;font-weight:1000;
+      display:inline-flex;gap:8px;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 8px 18px rgba(17,17,22,.10);
+    }
+    .btn.full{width:100%}
+    .btn.mini{min-height:36px;border-radius:12px;padding:7px 10px;font-size:12px}
+    .btn.red{background:var(--red)}
+    .btn.green{background:var(--green)}
+    .btn.blue{background:var(--blue)}
+    .btn.orange{background:var(--orange)}
+    .btn.yellow{background:var(--yellow);color:#111}
+    .btn.light{background:#eef0f6;color:#111;box-shadow:none}
+    .btn.ghost{background:#fff;color:#111;border:1px solid var(--line);box-shadow:none}
+    .btn.purple{background:var(--purple)}
+    .list{display:grid;gap:11px}
+    .empty{
+      background:#fff;border:2px dashed #d4d6df;color:var(--muted);border-radius:20px;padding:23px;text-align:center;font-weight:700
+    }
+    label{display:grid;gap:6px;font-size:12px;font-weight:900;color:#373946}
+    input,select,textarea{
+      width:100%;min-height:47px;border:1px solid var(--line);border-radius:15px;background:#fff;color:#111;
+      padding:10px 12px;outline:none;font-weight:650;
+    }
+    textarea{min-height:100px;resize:vertical}
+    input:focus,select:focus,textarea:focus{border-color:#111;box-shadow:0 0 0 3px rgba(17,17,22,.08)}
+    .row{display:grid;gap:10px}
+    .row.two,.row.three{grid-template-columns:1fr}
+    @media(min-width:680px){.row.two{grid-template-columns:repeat(2,1fr)}.row.three{grid-template-columns:repeat(3,1fr)}}
+    .order{
+      background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--soft);overflow:hidden;
+    }
+    .orderTop{padding:14px 14px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .orderName{font-size:16px;font-weight:1000;line-height:1.1}
+    .orderMeta{font-size:12px;color:var(--muted);font-weight:650;margin-top:4px;line-height:1.35}
+    .price{font-size:15px;font-weight:1000;white-space:nowrap;background:#f4f5fa;border-radius:12px;padding:7px 9px}
+    .tagrow{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 12px}
+    .tag{font-size:11px;font-weight:1000;border-radius:999px;padding:6px 9px;background:#eef0f6;color:#111}
+    .tag.red{background:#ffe2e5;color:#b00009}
+    .tag.green{background:#dff8ec;color:#006b46}
+    .tag.orange{background:#fff0d8;color:#9b5200}
+    .tag.blue{background:#e1eaff;color:#183fae}
+    .tag.purple{background:#eee5ff;color:#5520b5}
+    .tag.dark{background:#111;color:#fff}
+    .orderNotes{padding:0 14px 12px;font-size:12px;color:#4a4d5a;line-height:1.35;white-space:pre-wrap}
+    .quickActions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;background:#f8f8fb;padding:10px;border-top:1px solid var(--line)}
+    @media(min-width:560px){.quickActions{grid-template-columns:repeat(5,1fr)}}
+    .statusline{height:7px;background:#d8dbe6}
+    .statusline.danger{background:linear-gradient(90deg,var(--red),#ff8790)}
+    .statusline.work{background:linear-gradient(90deg,var(--orange),#ffd26a)}
+    .statusline.ship{background:linear-gradient(90deg,var(--blue),#84b6ff)}
+    .statusline.done{background:linear-gradient(90deg,var(--green),#6bebb5)}
+    .filterbar{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+    @media(min-width:720px){.filterbar{grid-template-columns:1.2fr 1fr 1fr auto}}
+    .tabs{
+      position:fixed;left:0;right:0;bottom:0;z-index:80;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);
+      border-top:1px solid var(--line);padding:8px 8px calc(8px + var(--safe));
+      display:grid;grid-template-columns:repeat(5,1fr);gap:6px;box-shadow:0 -10px 28px rgba(17,17,22,.11)
+    }
+    .tab{
+      border:0;border-radius:17px;min-height:60px;background:#f0f1f6;color:#111;font-weight:1000;font-size:11px;
+      display:grid;place-items:center;padding:5px 3px
+    }
+    .tab i{font-style:normal;font-size:22px;line-height:1}
+    .tab.active{background:#111;color:#fff}
+    .checkItem{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid #edf0f5}
+    .checkItem:last-child{border-bottom:0}
+    .checkItem input[type=checkbox]{width:24px;height:24px;min-height:auto;accent-color:var(--green);margin:0}
+    .checkText{flex:1}
+    .checkText b{font-size:14px}
+    .checkText small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+    .miniTable{width:100%;border-collapse:collapse;font-size:12px}
+    .miniTable th,.miniTable td{border-bottom:1px solid var(--line);padding:9px 6px;text-align:left;vertical-align:top}
+    .miniTable th{font-size:11px;color:#5b5e6b;text-transform:uppercase;letter-spacing:.04em}
+    .pillInput{display:flex;gap:7px;align-items:center}
+    .pillInput input{min-height:38px}
+    .moduleCard{
+      display:grid;gap:9px;align-content:space-between;min-height:154px;position:relative;overflow:hidden;
+      background:linear-gradient(145deg,#fff,#f8f9fc);
+    }
+    .moduleCard:before{content:"";position:absolute;right:-38px;top:-38px;width:118px;height:118px;border-radius:50%;background:rgba(229,9,20,.08)}
+    .moduleCard h3{margin:0;font-size:16px;font-weight:1000;position:relative}
+    .moduleCard p{margin:0;color:var(--muted);font-size:12px;line-height:1.35;font-weight:650;position:relative}
+    .moduleActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;position:relative}
+    .noteBox{background:#fffbea;border:1px solid #ffe487;border-radius:18px;padding:12px;color:#4c3900;font-size:13px;line-height:1.35;font-weight:700}
+    .toast{
+      position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(18px);z-index:100;
+      background:#111;color:#fff;border-radius:999px;padding:12px 16px;font-weight:1000;opacity:0;pointer-events:none;transition:.18s;
+      box-shadow:var(--shadow);max-width:calc(100vw - 30px);text-align:center
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .sheet{
+      background:#fff;border:1px solid var(--line);border-radius:22px;padding:16px;box-shadow:var(--soft);
+    }
+    .sheetHeader{
+      display:flex;align-items:center;justify-content:space-between;border-bottom:4px solid #111;padding-bottom:8px;margin-bottom:10px;gap:12px
+    }
+    .sheetHeader h2{margin:0;font-size:22px;font-weight:1000}
+    .sheetLogo{background:#111;color:#fff;border-radius:10px;padding:7px 10px;font-weight:1000;border:3px solid var(--yellow)}
+    .printTable{width:100%;border-collapse:collapse;font-size:10.5px}
+    .printTable th,.printTable td{border:1px solid #111;padding:5px;vertical-align:top}
+    .printTable th{background:#111;color:#fff;text-align:left}
+    .blankLines{display:grid;gap:8px}
+    .blankLine{height:34px;border:1px solid #111;border-radius:4px}
+    .small{font-size:12px;color:var(--muted);font-weight:650}
+    .hidden{display:none!important}
+    .pdfbox{display:grid;gap:10px}
+    .templateChooser{display:grid;gap:9px}
+    @media(min-width:760px){.templateChooser{grid-template-columns:repeat(4,1fr)}}
+    .templateBtn{justify-content:flex-start;text-align:left}
+    .kpiLine{display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 0;border-bottom:1px solid #edf0f5;font-weight:800}
+    .kpiLine:last-child{border-bottom:0}
+    .kpiLine span{color:var(--muted);font-weight:700}
+    .copyBox{
+      width:100%;min-height:230px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;white-space:pre-wrap;
+    }
+    .installHint{font-size:12px;color:#fff;opacity:.85;margin-top:9px;line-height:1.3}
+    @media print{
+      @page{size:A4 landscape;margin:8mm}
+      body{background:#fff;padding:0}
+      .hero,.tabs,.noPrint,.toast{display:none!important}
+      .app{max-width:none;margin:0}
+      .screen{display:none!important;padding:0}
+      #print.active{display:block!important}
+      .sheet{border:0;box-shadow:none;border-radius:0;padding:0}
+      .printTable{font-size:9.5px}
+      .printTable th,.printTable td{padding:4px}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header class="hero noPrint">
+    <div class="heroTop">
+      <div class="brand">
+        <div class="mark">HP67</div>
+        <div>
+          <h1>AuftragsApp V2</h1>
+          <p>Aufträge · PDF-Listen · Zahlung · Produktion · Versand</p>
+        </div>
+      </div>
+      <div class="datepill" id="todayBadge">Heute</div>
+    </div>
+    <div class="quickbar">
+      <input id="search" placeholder="Suchen: Kunde, Produkt, Notiz, Tracking …" oninput="render()">
+      <button onclick="openForm()">+ Auftrag</button>
+    </div>
+    <div class="installHint">Tipp iPhone: Teilen → „Zum Home-Bildschirm“ = wie App nutzen.</div>
+  </header>
+
+  <main>
+    <section class="screen active" id="home">
+      <div class="sectionHead"><div><h2>Dashboard</h2><small>Alles Wichtige auf einen Blick</small></div><button class="btn mini yellow" onclick="openForm()">+ Neu</button></div>
+      <div class="grid grid4">
+        <div class="card stat blue"><b id="kTotal">0</b><span>Aufträge gesamt</span></div>
+        <div class="card stat red"><b id="kUnpaid">0</b><span>nicht bezahlt</span></div>
+        <div class="card stat orange"><b id="kProduction">0</b><span>Produktion offen</span></div>
+        <div class="card stat green"><b id="kShip">0</b><span>bezahlt, nicht verschickt</span></div>
+      </div>
+
+      <div class="grid twoCols" style="margin-top:12px">
+        <div>
+          <div class="sectionHead"><div><h2>Heute nicht vergessen</h2><small>Für schusselige Tage extra klar</small></div><button class="btn mini light" onclick="resetChecks('daily')">Reset</button></div>
+          <div class="card" id="dailyChecks"></div>
+        </div>
+        <div>
+          <div class="sectionHead"><div><h2>Schnell-Erfassung</h2><small>In 30 Sekunden Auftrag speichern</small></div></div>
+          <div class="card">
+            <div class="row">
+              <label>Kunde<input id="quickCustomer" placeholder="Name"></label>
+              <label>Produkt<input id="quickProduct" placeholder="z.B. Sticker A7, Hoodie, Shirt"></label>
+              <div class="row two">
+                <label>Preis €<input id="quickPrice" type="number" step="0.01" placeholder="0,00"></label>
+                <label>Status<select id="quickStatus"><option>Nicht bezahlt</option><option>Bezahlt</option><option>Angezahlt</option></select></label>
+              </div>
+              <button class="btn yellow full" onclick="quickAdd()">Schnell speichern</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sectionHead"><div><h2>Dringende Aufträge</h2><small>Priorität hoch, fällig oder Zahlung/Versand offen</small></div></div>
+      <div class="list" id="urgentList"></div>
+    </section>
+
+    <section class="screen" id="orders">
+      <div class="sectionHead"><div><h2>Aufträge</h2><small>Filtern, abhaken, bearbeiten</small></div><button class="btn mini yellow" onclick="openForm()">+ Auftrag</button></div>
+      <div class="filterbar">
+        <select id="filterType" onchange="render()">
+          <option value="all">Alle Aufträge</option>
+          <option value="planning">in Planung</option>
+          <option value="unpaid">offen / nicht bezahlt</option>
+          <option value="paidUnshipped">bezahlt, nicht verschickt</option>
+          <option value="production">Produktion offen</option>
+          <option value="done">erledigt</option>
+        </select>
+        <select id="sortType" onchange="render()">
+          <option value="new">Neueste zuerst</option>
+          <option value="due">Fälligkeit zuerst</option>
+          <option value="prio">Priorität zuerst</option>
+          <option value="name">Kunde A-Z</option>
+        </select>
+        <select id="bulkAction">
+          <option value="">Schnellaktion wählen</option>
+          <option value="paid">Gefilterte als bezahlt</option>
+          <option value="ready">Gefilterte als fertig</option>
+          <option value="shipped">Gefilterte als verschickt</option>
+        </select>
+        <button class="btn light" onclick="runBulkAction()">Ausführen</button>
+      </div>
+      <div class="list" id="ordersList"></div>
+    </section>
+
+    <section class="screen" id="form">
+      <div class="sectionHead"><div><h2 id="formHeading">Neuer Auftrag</h2><small>Auftrag sauber erfassen</small></div><button class="btn mini ghost" onclick="go('orders')">Zurück</button></div>
+      <form class="card" id="orderForm" onsubmit="saveOrder(event)">
+        <input type="hidden" id="fId">
+        <div class="row three">
+          <label>Auftragsdatum<input type="date" id="fDate"></label>
+          <label>Fällig bis<input type="date" id="fDue"></label>
+          <label>Priorität<select id="fPrio"><option>Normal</option><option>Hoch</option><option>Sehr dringend</option></select></label>
+        </div>
+        <div class="row two">
+          <label>Kunde<input id="fCustomer" placeholder="Name"></label>
+          <label>Kontakt<input id="fContact" placeholder="WhatsApp, Insta, Telefon"></label>
+        </div>
+        <div class="row two">
+          <label>Produkt / Auftrag<input id="fProduct" placeholder="z.B. Hoodie, Sticker, Bundle"></label>
+          <label>Variante / Größe / Farbe<input id="fVariant" placeholder="A7, L, Rot, Schwarz …"></label>
+        </div>
+        <div class="row three">
+          <label>Menge<input id="fQty" type="number" min="1" step="1" placeholder="1"></label>
+          <label>Preis €<input id="fPrice" type="number" min="0" step="0.01" placeholder="0,00"></label>
+          <label>Zahlungsart<select id="fMethod"><option>Offen</option><option>Bar</option><option>PayPal</option><option>Überweisung</option><option>Sonstiges</option></select></label>
+        </div>
+        <div class="row three">
+          <label>Zahlung<select id="fPay"><option>Nicht bezahlt</option><option>Angezahlt</option><option>Bezahlt</option></select></label>
+          <label>Produktion<select id="fProd"><option>Planung</option><option>Material fehlt</option><option>Datei prüfen</option><option>In Produktion</option><option>Fertig</option></select></label>
+          <label>Versand / Übergabe<select id="fShip"><option>Nicht verschickt</option><option>Abholung offen</option><option>Verpackt</option><option>Verschickt</option><option>Übergeben</option></select></label>
+        </div>
+        <div class="row two">
+          <label>Adresse / Übergabe-Ort<input id="fAddress" placeholder="optional"></label>
+          <label>Sendungsnummer<input id="fTracking" placeholder="optional"></label>
+        </div>
+        <div class="row two">
+          <label>Benötigtes Material<input id="fMaterial" placeholder="z.B. A4 glossy, Hoodie L schwarz"></label>
+          <label>Motiv/Dateiname<input id="fFile" placeholder="optional"></label>
+        </div>
+        <label>Notizen<textarea id="fNotes" placeholder="Kundenwunsch, Motivdetails, To-dos, Besonderheiten …"></textarea></label>
+
+        <div class="sectionHead" style="margin-bottom:8px"><div><h2 style="font-size:16px">Auftrags-Check</h2><small>Wie auf den PDF-Listen abhaken</small></div></div>
+        <div class="grid grid3" id="formCheckGrid"></div>
+
+        <div class="grid grid3" style="margin-top:14px">
+          <button class="btn green full" type="submit">Speichern</button>
+          <button class="btn light full" type="button" onclick="duplicateFormOrder()">Duplizieren</button>
+          <button class="btn red full" type="button" onclick="deleteFormOrder()">Löschen</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="screen" id="lists">
+      <div class="sectionHead"><div><h2>PDF-Listen als App</h2><small>Alle Listen aus deinem PDF direkt nutzbar</small></div></div>
+      <div class="noteBox">Diese Module sind wie deine A4-Listen aufgebaut: am Handy ausfüllen, abhaken und zusätzlich als A4 drucken.</div>
+      <div class="grid grid4" style="margin-top:12px" id="moduleGrid"></div>
+
+      <div class="sectionHead"><div><h2>Original-PDFs</h2><small>Im ZIP mit dabei, falls du lieber direkt druckst</small></div></div>
+      <div class="card pdfbox">
+        <a class="btn red full" href="HP67_Organisationslisten_A4.pdf" target="_blank">📄 Organisationslisten PDF öffnen</a>
+        <a class="btn dark full" href="HP67_Auftragsliste_A4.pdf" target="_blank" style="background:#111">📋 Auftragsliste PDF öffnen</a>
+      </div>
+    </section>
+
+    <section class="screen" id="module">
+      <div class="sectionHead"><div><h2 id="moduleTitle">Liste</h2><small id="moduleSub">Modul</small></div><button class="btn mini ghost" onclick="go('lists')">Zurück</button></div>
+      <div id="moduleContent"></div>
+    </section>
+
+    <section class="screen" id="tools">
+      <div class="sectionHead"><div><h2>Werkzeuge</h2><small>Material, Wochenplan, Notizen, Backup</small></div></div>
+      <div class="grid grid3">
+        <button class="btn light full" onclick="openModule('material')">📦 Material</button>
+        <button class="btn light full" onclick="openModule('week')">🗓 Wochenplan</button>
+        <button class="btn light full" onclick="openModule('notes')">📝 Notizen</button>
+      </div>
+
+      <div class="sectionHead"><div><h2>Backup & Export</h2><small>Wichtig, weil Handy-Browser lokal speichert</small></div></div>
+      <div class="card">
+        <div class="grid grid3">
+          <button class="btn blue full" onclick="exportJSON()">💾 JSON Backup</button>
+          <button class="btn green full" onclick="exportCSV()">📊 CSV Export</button>
+          <button class="btn yellow full" onclick="document.getElementById('importFile').click()">⬆ Backup importieren</button>
+        </div>
+        <input type="file" accept=".json,application/json" id="importFile" class="hidden" onchange="importJSON(event)">
+      </div>
+
+      <div class="sectionHead"><div><h2>NotebookLM Text</h2><small>Sauber kopieren und einfügen</small></div><button class="btn mini light" onclick="copyNotebook()">Kopieren</button></div>
+      <textarea class="copyBox" id="notebookText" readonly></textarea>
+
+      <div class="sectionHead"><div><h2>Gefahrenzone</h2><small>Nur wenn wirklich nötig</small></div></div>
+      <div class="card">
+        <button class="btn red full" onclick="wipeAll()">Alle App-Daten löschen</button>
+      </div>
+    </section>
+
+    <section class="screen" id="print">
+      <div class="sectionHead noPrint"><div><h2 id="printName">A4 Druck</h2><small>Querformat empfohlen</small></div><button class="btn yellow" onclick="window.print()">Drucken</button></div>
+      <div class="sheet" id="printSheet"></div>
+    </section>
+  </main>
+</div>
+
+<nav class="tabs noPrint">
+  <button class="tab active" data-nav="home" onclick="go('home')"><i>🏠</i>Start</button>
+  <button class="tab" data-nav="orders" onclick="go('orders')"><i>📋</i>Aufträge</button>
+  <button class="tab" data-nav="lists" onclick="go('lists')"><i>📄</i>Listen</button>
+  <button class="tab" data-nav="tools" onclick="go('tools')"><i>🧰</i>Tools</button>
+  <button class="tab" data-nav="print" onclick="openPrint('overview')"><i>🖨</i>Druck</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const APP_KEY = "hp67_order_app_v2";
+const CHECK_KEY = "hp67_checks_v2";
+const modules = [
+  {id:"daily", icon:"✅", title:"Tages-Checkliste", sub:"jeden Tag abhaken", print:"daily"},
+  {id:"neworder", icon:"🧾", title:"Neuer Auftrag", sub:"Aufnahmeblatt", print:"neworder"},
+  {id:"production", icon:"🛠", title:"Produktionsliste", sub:"was muss gemacht werden", print:"production"},
+  {id:"payments", icon:"💶", title:"Offene Zahlungen", sub:"wer schuldet noch", print:"payments"},
+  {id:"shipping", icon:"📦", title:"Bezahlt, nicht verschickt", sub:"Versand/Übergabe", print:"shipping"},
+  {id:"material", icon:"📦", title:"Material & Nachkauf", sub:"Bestand und Einkauf", print:"material"},
+  {id:"week", icon:"🗓", title:"Wochenplan", sub:"Tage sauber planen", print:"week"},
+  {id:"quality", icon:"🔍", title:"Endkontrolle", sub:"Fehler vermeiden", print:"quality"},
+  {id:"notes", icon:"📝", title:"Notizen", sub:"alles sammeln", print:"notes"}
+];
+
+const checkTemplates = {
+  daily: [
+    ["Nachrichten geprüft","WhatsApp, Insta, Shop, E-Mail"],
+    ["Neue Aufträge eingetragen","Nichts nur im Kopf behalten"],
+    ["Offene Zahlungen geprüft","Nicht bezahlte Sachen extra markieren"],
+    ["Produktion sortiert","Was heute wirklich gemacht werden muss"],
+    ["Versand/Übergabe geprüft","Bezahlt + fertig = raus damit"],
+    ["Materialbestand geprüft","Papier, Folie, Textilien, Verpackung"],
+    ["Backup gemacht","Mindestens regelmäßig JSON exportieren"]
+  ],
+  production: [
+    ["Datei/Motiv geprüft","Format, Größe, Farbe, Spiegelung"],
+    ["Material vorhanden","Textil/Papier/Folie/Verpackung da"],
+    ["Druck/Plot vorbereitet","Keine falsche Größe, kein Randproblem"],
+    ["Produziert","Gedruckt, gepresst, geschnitten oder fertiggestellt"],
+    ["Endkontrolle gemacht","Flecken, Kanten, Schnitt, Farbe"],
+    ["Kunde informiert","Foto/Status gesendet"]
+  ],
+  quality: [
+    ["Kundenname stimmt","Kein Auftrag verwechselt"],
+    ["Produkt vollständig","Menge, Größe, Farbe, Variante stimmt"],
+    ["Druckbild sauber","Keine Streifen, Flecken, falsche Farbe"],
+    ["Schnitt/Pressung sauber","Keine schiefen Kanten, hält sauber"],
+    ["Zahlung geprüft","Bezahlt oder bewusst als offen markiert"],
+    ["Versand/Übergabe geprüft","Adresse, Tracking, Abholung"]
+  ],
+  shipping: [
+    ["Adresse geprüft","Name, Straße, PLZ, Stadt"],
+    ["Alles eingepackt","Keine Teile vergessen"],
+    ["Foto gemacht","Optional als Beleg"],
+    ["Tracking eingetragen","Falls vorhanden"],
+    ["Kunde informiert","Versand/Übergabe bestätigt"]
+  ]
+};
+
+const formChecks = [
+  ["fileChecked","Datei geprüft"],["materialChecked","Material da"],["paymentChecked","Zahlung geprüft"],
+  ["printed","Gedruckt"],["cutOrPressed","Geschnitten/Gepresst"],["qualityChecked","Endkontrolle"],
+  ["packed","Verpackt"],["customerInformed","Kunde informiert"],["archived","Abgelegt"]
+];
+
+function uid(){return "o_"+Math.random().toString(36).slice(2)+Date.now().toString(36)}
+function todayISO(){return new Date().toISOString().slice(0,10)}
+function deDate(v){if(!v)return ""; const p=v.split("-"); return p.length===3?`${p[2]}.${p[1]}.${p[0]}`:v}
+function money(v){return (Number(v)||0).toLocaleString("de-DE",{style:"currency",currency:"EUR"})}
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function parse(v){try{return JSON.parse(v)}catch(e){return null}}
+function toast(t){const e=document.getElementById("toast");e.textContent=t;e.classList.add("show");clearTimeout(window.tT);window.tT=setTimeout(()=>e.classList.remove("show"),1600)}
+
+let state = load();
+function blankState(){
+  return {
+    orders:[],
+    materials:[
+      {id:uid(),name:"A4 Stickerpapier",stock:"",min:"",note:""},
+      {id:uid(),name:"A3 Stickerpapier",stock:"",min:"",note:""},
+      {id:uid(),name:"Kalt-Laminierfolie UV/Outdoor",stock:"",min:"",note:""},
+      {id:uid(),name:"DTF / DTV Folie",stock:"",min:"",note:""},
+      {id:uid(),name:"Versandtaschen / Kartons",stock:"",min:"",note:""}
+    ],
+    week:[
+      {id:uid(),day:"Montag",text:"Offene Zahlungen prüfen",done:false},
+      {id:uid(),day:"Dienstag",text:"Material nachzählen",done:false},
+      {id:uid(),day:"Mittwoch",text:"Produktion bündeln",done:false},
+      {id:uid(),day:"Donnerstag",text:"Versand vorbereiten",done:false},
+      {id:uid(),day:"Freitag",text:"Backup exportieren",done:false}
+    ],
+    notes:""
+  }
+}
+function load(){
+  const s=parse(localStorage.getItem(APP_KEY));
+  if(!s)return blankState();
+  const b=blankState();
+  return {orders:Array.isArray(s.orders)?s.orders:[],materials:Array.isArray(s.materials)?s.materials:b.materials,week:Array.isArray(s.week)?s.week:b.week,notes:s.notes||""}
+}
+function save(){localStorage.setItem(APP_KEY,JSON.stringify(state));render()}
+
+function go(id){
+  document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.nav===id));
+  if(!["home","orders","lists","tools","print"].includes(id)){
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  }
+  render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function setNav(id){document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.nav===id))}
+function paid(o){return o.pay==="Bezahlt"}
+function done(o){return o.prod==="Fertig" && ["Verschickt","Übergeben"].includes(o.ship)}
+function prodOpen(o){return o.prod!=="Fertig"}
+function shipOpen(o){return paid(o) && o.prod==="Fertig" && !["Verschickt","Übergeben"].includes(o.ship)}
+function danger(o){return !paid(o)}
+function dueTime(o){return o.due?new Date(o.due).getTime():Infinity}
+function prioScore(o){return o.prio==="Sehr dringend"?0:o.prio==="Hoch"?1:2}
+
+function filteredOrders(){
+  const q=document.getElementById("search")?.value.trim().toLowerCase()||"";
+  let arr=[...state.orders];
+  if(q)arr=arr.filter(o=>Object.values(o).join(" ").toLowerCase().includes(q));
+  const f=document.getElementById("filterType")?.value||"all";
+  if(f==="planning")arr=arr.filter(o=>o.prod==="Planung"||o.prod==="Datei prüfen");
+  if(f==="unpaid")arr=arr.filter(o=>!paid(o));
+  if(f==="paidUnshipped")arr=arr.filter(shipOpen);
+  if(f==="production")arr=arr.filter(prodOpen);
+  if(f==="done")arr=arr.filter(done);
+  const s=document.getElementById("sortType")?.value||"new";
+  if(s==="due")arr.sort((a,b)=>dueTime(a)-dueTime(b));
+  else if(s==="prio")arr.sort((a,b)=>prioScore(a)-prioScore(b)||dueTime(a)-dueTime(b));
+  else if(s==="name")arr.sort((a,b)=>(a.customer||"").localeCompare(b.customer||""));
+  else arr.sort((a,b)=>new Date(b.created||b.date)-new Date(a.created||a.date));
+  return arr;
+}
+
+function lineClass(o){return done(o)?"done":!paid(o)?"danger":prodOpen(o)?"work":shipOpen(o)?"ship":"done"}
+function tagClass(type,val){
+  if(type==="pay")return val==="Bezahlt"?"green":val==="Angezahlt"?"orange":"red";
+  if(type==="prod")return val==="Fertig"?"green":val==="Material fehlt"?"red":val==="In Produktion"?"orange":"blue";
+  if(type==="ship")return ["Verschickt","Übergeben"].includes(val)?"green":val==="Verpackt"?"orange":"blue";
+  if(type==="prio")return val==="Sehr dringend"?"red":val==="Hoch"?"orange":"dark";
+  return "";
+}
+function orderCard(o){
+  return `<article class="order">
+    <div class="statusline ${lineClass(o)}"></div>
+    <div class="orderTop">
+      <div>
+        <div class="orderName">${esc(o.customer||"Ohne Kunde")}</div>
+        <div class="orderMeta">${esc(o.product||"Ohne Produkt")} ${o.variant? "· "+esc(o.variant):""} ${o.qty? "· Menge "+esc(o.qty):""}<br>${o.date? "Datum "+deDate(o.date):""}${o.due? " · fällig "+deDate(o.due):""}</div>
+      </div>
+      <div class="price">${money(o.price)}</div>
+    </div>
+    <div class="tagrow">
+      <span class="tag ${tagClass("pay",o.pay)}">${esc(o.pay||"Nicht bezahlt")}</span>
+      <span class="tag ${tagClass("prod",o.prod)}">${esc(o.prod||"Planung")}</span>
+      <span class="tag ${tagClass("ship",o.ship)}">${esc(o.ship||"Nicht verschickt")}</span>
+      ${o.prio&&o.prio!=="Normal"?`<span class="tag ${tagClass("prio",o.prio)}">${esc(o.prio)}</span>`:""}
+    </div>
+    ${o.notes?`<div class="orderNotes">${esc(o.notes)}</div>`:""}
+    <div class="quickActions">
+      <button class="btn mini ghost" onclick="editOrder('${o.id}')">Bearbeiten</button>
+      <button class="btn mini yellow" onclick="updateOrder('${o.id}',{pay:'Bezahlt'})">Bezahlt</button>
+      <button class="btn mini orange" onclick="updateOrder('${o.id}',{prod:'In Produktion'})">Produktion</button>
+      <button class="btn mini green" onclick="updateOrder('${o.id}',{prod:'Fertig'})">Fertig</button>
+      <button class="btn mini blue" onclick="updateOrder('${o.id}',{ship:'Verschickt'})">Verschickt</button>
+    </div>
+  </article>`;
+}
+function updateOrder(id,patch){
+  const o=state.orders.find(x=>x.id===id);
+  if(!o)return;
+  Object.assign(o,patch,{updated:new Date().toISOString()});
+  save();toast("Aktualisiert");
+}
+function openForm(id){
+  const isEdit=!!id;
+  const o=isEdit?state.orders.find(x=>x.id===id):null;
+  document.getElementById("formHeading").textContent=isEdit?"Auftrag bearbeiten":"Neuer Auftrag";
+  document.getElementById("fId").value=o?.id||"";
+  document.getElementById("fDate").value=o?.date||todayISO();
+  document.getElementById("fDue").value=o?.due||"";
+  document.getElementById("fPrio").value=o?.prio||"Normal";
+  document.getElementById("fCustomer").value=o?.customer||"";
+  document.getElementById("fContact").value=o?.contact||"";
+  document.getElementById("fProduct").value=o?.product||"";
+  document.getElementById("fVariant").value=o?.variant||"";
+  document.getElementById("fQty").value=o?.qty||1;
+  document.getElementById("fPrice").value=o?.price||"";
+  document.getElementById("fMethod").value=o?.method||"Offen";
+  document.getElementById("fPay").value=o?.pay||"Nicht bezahlt";
+  document.getElementById("fProd").value=o?.prod||"Planung";
+  document.getElementById("fShip").value=o?.ship||"Nicht verschickt";
+  document.getElementById("fAddress").value=o?.address||"";
+  document.getElementById("fTracking").value=o?.tracking||"";
+  document.getElementById("fMaterial").value=o?.material||"";
+  document.getElementById("fFile").value=o?.file||"";
+  document.getElementById("fNotes").value=o?.notes||"";
+  renderFormChecks(o?.checks||{});
+  go("form");
+}
+function editOrder(id){openForm(id)}
+function renderFormChecks(checks){
+  document.getElementById("formCheckGrid").innerHTML=formChecks.map(([key,label])=>`
+    <label class="checkItem" style="border:1px solid var(--line);border-radius:14px;padding:10px;background:#fafbfe">
+      <input type="checkbox" id="chk_${key}" ${checks[key]?"checked":""}>
+      <span class="checkText"><b>${label}</b></span>
+    </label>`).join("");
+}
+function collectFormChecks(){
+  const c={}; formChecks.forEach(([k])=>c[k]=document.getElementById("chk_"+k)?.checked||false); return c;
+}
+function saveOrder(ev){
+  ev.preventDefault();
+  const id=document.getElementById("fId").value||uid();
+  const old=state.orders.find(x=>x.id===id);
+  const o={
+    id,created:old?.created||new Date().toISOString(),updated:new Date().toISOString(),
+    date:document.getElementById("fDate").value||todayISO(),
+    due:document.getElementById("fDue").value,
+    prio:document.getElementById("fPrio").value,
+    customer:document.getElementById("fCustomer").value.trim(),
+    contact:document.getElementById("fContact").value.trim(),
+    product:document.getElementById("fProduct").value.trim(),
+    variant:document.getElementById("fVariant").value.trim(),
+    qty:document.getElementById("fQty").value||1,
+    price:document.getElementById("fPrice").value,
+    method:document.getElementById("fMethod").value,
+    pay:document.getElementById("fPay").value,
+    prod:document.getElementById("fProd").value,
+    ship:document.getElementById("fShip").value,
+    address:document.getElementById("fAddress").value.trim(),
+    tracking:document.getElementById("fTracking").value.trim(),
+    material:document.getElementById("fMaterial").value.trim(),
+    file:document.getElementById("fFile").value.trim(),
+    notes:document.getElementById("fNotes").value.trim(),
+    checks:collectFormChecks()
+  };
+  const i=state.orders.findIndex(x=>x.id===id);
+  if(i>=0)state.orders[i]=o; else state.orders.unshift(o);
+  save();toast("Auftrag gespeichert");go("orders");
+}
+function deleteFormOrder(){
+  const id=document.getElementById("fId").value;
+  if(!id){document.getElementById("orderForm").reset();return}
+  if(!confirm("Auftrag wirklich löschen?"))return;
+  state.orders=state.orders.filter(x=>x.id!==id);save();toast("Gelöscht");go("orders");
+}
+function duplicateFormOrder(){
+  const id=document.getElementById("fId").value;
+  if(!id){toast("Erst speichern");return}
+  const o=state.orders.find(x=>x.id===id); if(!o)return;
+  const c={...o,id:uid(),customer:(o.customer||"")+" Kopie",created:new Date().toISOString(),updated:new Date().toISOString()};
+  state.orders.unshift(c);save();toast("Dupliziert");openForm(c.id);
+}
+function quickAdd(){
+  const customer=document.getElementById("quickCustomer").value.trim();
+  const product=document.getElementById("quickProduct").value.trim();
+  if(!customer&&!product){toast("Kunde oder Produkt fehlt");return}
+  state.orders.unshift({id:uid(),created:new Date().toISOString(),updated:new Date().toISOString(),date:todayISO(),due:"",prio:"Normal",customer,contact:"",product,variant:"",qty:1,price:document.getElementById("quickPrice").value,pay:document.getElementById("quickStatus").value,method:"Offen",prod:"Planung",ship:"Nicht verschickt",address:"",tracking:"",material:"",file:"",notes:"",checks:{}});
+  document.getElementById("quickCustomer").value="";document.getElementById("quickProduct").value="";document.getElementById("quickPrice").value="";
+  save();toast("Schnellauftrag gespeichert");
+}
+function runBulkAction(){
+  const val=document.getElementById("bulkAction").value;
+  if(!val){toast("Aktion wählen");return}
+  const arr=filteredOrders();
+  if(!arr.length){toast("Keine gefilterten Aufträge");return}
+  if(!confirm(`${arr.length} gefilterte Aufträge aktualisieren?`))return;
+  arr.forEach(o=>{
+    if(val==="paid")o.pay="Bezahlt";
+    if(val==="ready")o.prod="Fertig";
+    if(val==="shipped")o.ship="Verschickt";
+    o.updated=new Date().toISOString();
+  });
+  document.getElementById("bulkAction").value="";
+  save();toast("Schnellaktion erledigt");
+}
+
+function renderChecks(area,key){
+  const all=parse(localStorage.getItem(CHECK_KEY))||{};
+  const vals=all[key]||[];
+  const list=checkTemplates[key]||[];
+  document.getElementById(area).innerHTML=list.map((x,i)=>`
+    <label class="checkItem">
+      <input type="checkbox" ${vals[i]?"checked":""} onchange="toggleCheck('${key}',${i},this.checked)">
+      <span class="checkText"><b>${esc(x[0])}</b><small>${esc(x[1])}</small></span>
+    </label>`).join("");
+}
+function toggleCheck(key,i,v){
+  const all=parse(localStorage.getItem(CHECK_KEY))||{};
+  all[key]=all[key]||[];
+  all[key][i]=v;
+  localStorage.setItem(CHECK_KEY,JSON.stringify(all));
+}
+function resetChecks(key){
+  const all=parse(localStorage.getItem(CHECK_KEY))||{};
+  all[key]=(checkTemplates[key]||[]).map(()=>false);
+  localStorage.setItem(CHECK_KEY,JSON.stringify(all));
+  render();toast("Checkliste zurückgesetzt");
+}
+
+function openModule(id){
+  const m=modules.find(x=>x.id===id)||modules[0];
+  document.getElementById("moduleTitle").textContent=m.icon+" "+m.title;
+  document.getElementById("moduleSub").textContent=m.sub;
+  const c=document.getElementById("moduleContent");
+  if(id==="daily")c.innerHTML=`<div class="card" id="mDaily"></div><div class="grid grid2" style="margin-top:12px"><button class="btn light" onclick="resetChecks('daily')">Reset</button><button class="btn yellow" onclick="openPrint('daily')">A4 drucken</button></div>`;
+  else if(id==="production")c.innerHTML=`<div class="card" id="mProductionChecks"></div><div class="sectionHead"><div><h2>Produktionsaufträge</h2></div><button class="btn mini yellow" onclick="openPrint('production')">A4 drucken</button></div><div class="list">${state.orders.filter(prodOpen).map(orderCard).join("")||'<div class="empty">Keine Produktion offen.</div>'}</div>`;
+  else if(id==="payments")c.innerHTML=`<div class="sectionHead"><div><h2>Offene Zahlungen</h2></div><button class="btn mini yellow" onclick="openPrint('payments')">A4 drucken</button></div><div class="list">${state.orders.filter(o=>!paid(o)).map(orderCard).join("")||'<div class="empty">Keine offenen Zahlungen.</div>'}</div>`;
+  else if(id==="shipping")c.innerHTML=`<div class="card" id="mShippingChecks"></div><div class="sectionHead"><div><h2>Bezahlt, fertig, nicht raus</h2></div><button class="btn mini yellow" onclick="openPrint('shipping')">A4 drucken</button></div><div class="list">${state.orders.filter(shipOpen).map(orderCard).join("")||'<div class="empty">Nichts zum Verschicken offen.</div>'}</div>`;
+  else if(id==="material")c.innerHTML=materialModule();
+  else if(id==="week")c.innerHTML=weekModule();
+  else if(id==="quality")c.innerHTML=`<div class="card" id="mQuality"></div><div class="grid grid2" style="margin-top:12px"><button class="btn light" onclick="resetChecks('quality')">Reset</button><button class="btn yellow" onclick="openPrint('quality')">A4 drucken</button></div>`;
+  else if(id==="notes")c.innerHTML=notesModule();
+  else if(id==="neworder")c.innerHTML=`<div class="card"><p class="small">Nutze das digitale Aufnahmeblatt oder druck dir ein leeres A4-Blatt.</p><div class="grid grid2"><button class="btn yellow" onclick="openForm()">Digital ausfüllen</button><button class="btn light" onclick="openPrint('neworder')">Leeres A4 drucken</button></div></div>`;
+  go("module");
+  if(id==="daily")renderChecks("mDaily","daily");
+  if(id==="production")renderChecks("mProductionChecks","production");
+  if(id==="shipping")renderChecks("mShippingChecks","shipping");
+  if(id==="quality")renderChecks("mQuality","quality");
+}
+function materialModule(){
+  return `<div class="sectionHead"><div><h2>Materialbestand</h2></div><button class="btn mini yellow" onclick="addMaterial()">+ Material</button></div>
+  <div class="card"><table class="miniTable"><thead><tr><th>Material</th><th>Bestand</th><th>Minimum</th><th>Notiz</th><th></th></tr></thead><tbody>
+  ${state.materials.map(m=>`<tr>
+    <td><input value="${esc(m.name)}" onchange="mat('${m.id}','name',this.value)"></td>
+    <td><input value="${esc(m.stock)}" onchange="mat('${m.id}','stock',this.value)"></td>
+    <td><input value="${esc(m.min)}" onchange="mat('${m.id}','min',this.value)"></td>
+    <td><input value="${esc(m.note)}" onchange="mat('${m.id}','note',this.value)"></td>
+    <td><button class="btn mini red" onclick="delMaterial('${m.id}')">×</button></td>
+  </tr>`).join("")}
+  </tbody></table></div><div class="grid grid2" style="margin-top:12px"><button class="btn yellow" onclick="openPrint('material')">A4 drucken</button><button class="btn light" onclick="addMaterial()">+ Material</button></div>`;
+}
+function addMaterial(){state.materials.push({id:uid(),name:"Neues Material",stock:"",min:"",note:""});save();openModule("material");}
+function mat(id,k,v){const m=state.materials.find(x=>x.id===id);if(m){m[k]=v;save()}}
+function delMaterial(id){state.materials=state.materials.filter(x=>x.id!==id);save();openModule("material")}
+function weekModule(){
+  const days=["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
+  return `<div class="sectionHead"><div><h2>Wochenplan</h2></div><button class="btn mini yellow" onclick="addWeek()">+ Aufgabe</button></div>`+
+  days.map(day=>`<div class="card" style="margin-bottom:10px"><h3 style="margin:0 0 8px">${day}</h3>${state.week.filter(w=>w.day===day).map(w=>`
+    <label class="checkItem"><input type="checkbox" ${w.done?"checked":""} onchange="weekDone('${w.id}',this.checked)"><span class="checkText"><b>${esc(w.text)}</b></span><button class="btn mini red" onclick="delWeek('${w.id}')">×</button></label>`).join("")||'<div class="small">Keine Aufgabe</div>'}</div>`).join("")+
+  `<button class="btn yellow full" onclick="openPrint('week')">A4 Wochenplan drucken</button>`;
+}
+function addWeek(){const day=prompt("Tag?", "Montag"); if(!day)return; const text=prompt("Aufgabe?"); if(!text)return; state.week.push({id:uid(),day,text,done:false});save();openModule("week")}
+function weekDone(id,v){const w=state.week.find(x=>x.id===id);if(w){w.done=v;save()}}
+function delWeek(id){state.week=state.week.filter(x=>x.id!==id);save();openModule("week")}
+function notesModule(){
+  return `<div class="card"><label>Notizen<textarea id="notesField" style="min-height:260px">${esc(state.notes)}</textarea></label><div class="grid grid2" style="margin-top:12px"><button class="btn green" onclick="state.notes=document.getElementById('notesField').value;save();toast('Notiz gespeichert')">Speichern</button><button class="btn yellow" onclick="openPrint('notes')">A4 drucken</button></div></div>`;
+}
+
+function renderModuleGrid(){
+  document.getElementById("moduleGrid").innerHTML=modules.map(m=>`
+    <div class="card moduleCard">
+      <h3>${m.icon} ${m.title}</h3>
+      <p>${m.sub}</p>
+      <div class="moduleActions">
+        <button class="btn mini light" onclick="openModule('${m.id}')">Öffnen</button>
+        <button class="btn mini yellow" onclick="openPrint('${m.print}')">Drucken</button>
+      </div>
+    </div>`).join("");
+}
+
+function openPrint(type){
+  document.getElementById("printName").textContent="A4 Druck · "+printTitle(type);
+  document.getElementById("printSheet").innerHTML=printHTML(type);
+  go("print");setNav("print");
+}
+function printTitle(type){
+  return ({overview:"Übersicht",daily:"Tages-Checkliste",neworder:"Neuer Auftrag",production:"Produktionsliste",payments:"Offene Zahlungen",shipping:"Bezahlt nicht verschickt",material:"Material & Nachkauf",week:"Wochenplan",quality:"Endkontrolle",notes:"Notizen"}[type]||"Liste")
+}
+function sheetHead(title,sub=""){
+  return `<div class="sheetHeader"><div><h2>${esc(title)}</h2>${sub?`<div class="small">${esc(sub)}</div>`:""}</div><div class="sheetLogo">HP67</div></div>`
+}
+function orderRows(arr,blank=8){
+  let rows=arr.map(o=>`<tr><td>☐</td><td>${esc(o.customer)}</td><td>${esc(o.product)}<br>${esc(o.variant||"")}</td><td>${esc(o.qty||1)}</td><td>${money(o.price)}</td><td>${esc(o.pay)}</td><td>${esc(o.prod)}</td><td>${esc(o.ship)}</td><td>${esc(o.notes||"")}</td></tr>`).join("");
+  for(let i=arr.length;i<blank;i++)rows+=`<tr><td>☐</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td style="height:28px"></td></tr>`;
+  return `<table class="printTable"><thead><tr><th>✓</th><th>Kunde</th><th>Auftrag</th><th>Menge</th><th>Preis</th><th>Zahlung</th><th>Produktion</th><th>Versand</th><th>Notizen</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function checklistPrint(key,rows=checkTemplates[key]||[]){
+  return `<table class="printTable"><thead><tr><th>✓</th><th>Punkt</th><th>Notizen</th></tr></thead><tbody>`+
+    rows.map(r=>`<tr><td style="width:28px">☐</td><td><b>${esc(r[0])}</b><br>${esc(r[1]||"")}</td><td style="height:36px"></td></tr>`).join("")+
+    `</tbody></table>`;
+}
+function printHTML(type){
+  if(type==="overview")return sheetHead("HP67 Auftragsübersicht",new Date().toLocaleDateString("de-DE"))+orderRows(state.orders.slice(0,14),14);
+  if(type==="daily")return sheetHead("Tages-Checkliste","Jeden Tag abhaken")+checklistPrint("daily");
+  if(type==="neworder")return sheetHead("Neuer Auftrag · Aufnahmeblatt","Für handschriftliche Erfassung")+`
+    <table class="printTable"><tbody>
+      <tr><th>Kunde</th><td></td><th>Kontakt</th><td></td></tr>
+      <tr><th>Datum</th><td></td><th>Fällig bis</th><td></td></tr>
+      <tr><th>Produkt</th><td></td><th>Variante/Größe</th><td></td></tr>
+      <tr><th>Menge</th><td></td><th>Preis</th><td></td></tr>
+      <tr><th>Zahlung</th><td>☐ offen ☐ angezahlt ☐ bezahlt</td><th>Versand</th><td>☐ offen ☐ verpackt ☐ verschickt</td></tr>
+      <tr><th>Material</th><td colspan="3" style="height:34px"></td></tr>
+      <tr><th>Notizen</th><td colspan="3" style="height:120px"></td></tr>
+      <tr><th>Check</th><td colspan="3">☐ Datei geprüft &nbsp; ☐ Material da &nbsp; ☐ Produziert &nbsp; ☐ Endkontrolle &nbsp; ☐ Verpackt &nbsp; ☐ Kunde informiert</td></tr>
+    </tbody></table>`;
+  if(type==="production")return sheetHead("Produktionsliste","Alles, was noch gemacht werden muss")+orderRows(state.orders.filter(prodOpen),12);
+  if(type==="payments")return sheetHead("Offene Zahlungen","Nicht bezahlt oder angezahlt")+orderRows(state.orders.filter(o=>!paid(o)),12);
+  if(type==="shipping")return sheetHead("Bezahlt, aber noch nicht verschickt","Fertig + bezahlt + Versand offen")+orderRows(state.orders.filter(shipOpen),12);
+  if(type==="material")return sheetHead("Material & Nachkauf","Bestand prüfen")+`<table class="printTable"><thead><tr><th>✓</th><th>Material</th><th>Bestand</th><th>Minimum</th><th>Nachkaufen?</th><th>Notizen</th></tr></thead><tbody>${state.materials.map(m=>`<tr><td>☐</td><td>${esc(m.name)}</td><td>${esc(m.stock)}</td><td>${esc(m.min)}</td><td>☐ ja ☐ nein</td><td>${esc(m.note)}</td></tr>`).join("")}${"<tr><td>☐</td><td></td><td></td><td></td><td>☐ ja ☐ nein</td><td style='height:30px'></td></tr>".repeat(8)}</tbody></table>`;
+  if(type==="week"){
+    const days=["Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag","Sonntag"];
+    return sheetHead("Wochenplan","Aufgaben und Notizen")+`<table class="printTable"><thead><tr>${days.map(d=>`<th>${d}</th>`).join("")}</tr></thead><tbody><tr>${days.map(d=>`<td>${state.week.filter(w=>w.day===d).map(w=>`${w.done?"☑":"☐"} ${esc(w.text)}`).join("<br>")}<br><br>${"☐ __________________<br>".repeat(4)}</td>`).join("")}</tr></tbody></table>`;
+  }
+  if(type==="quality")return sheetHead("Endkontrolle & Fehler-Vermeidung","Vor Übergabe/Versand")+checklistPrint("quality");
+  if(type==="notes")return sheetHead("Notizen","Freier Platz")+`<div style="white-space:pre-wrap;border:1px solid #111;min-height:430px;padding:10px">${esc(state.notes||"")}</div>`;
+  return sheetHead("Liste")+orderRows(state.orders,12);
+}
+
+function exportJSON(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  download(blob,"HP67_AuftragsApp_Backup.json");
+}
+function exportCSV(){
+  const cols=["Datum","Fällig","Kunde","Kontakt","Produkt","Variante","Menge","Preis","Zahlung","Zahlungsart","Produktion","Versand","Adresse","Tracking","Material","Datei","Notizen"];
+  const rows=state.orders.map(o=>[o.date,o.due,o.customer,o.contact,o.product,o.variant,o.qty,o.price,o.pay,o.method,o.prod,o.ship,o.address,o.tracking,o.material,o.file,o.notes]);
+  const csv=[cols,...rows].map(r=>r.map(x=>`"${String(x??"").replace(/"/g,'""')}"`).join(";")).join("\n");
+  download(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}),"HP67_Auftraege.csv");
+}
+function download(blob,name){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+function importJSON(e){
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{const s=JSON.parse(r.result); if(!Array.isArray(s.orders))throw new Error(); state={...blankState(),...s}; save();toast("Backup importiert")}catch(err){alert("Backup konnte nicht gelesen werden.")}};
+  r.readAsText(f);
+}
+function wipeAll(){if(!confirm("Wirklich ALLE Daten löschen?"))return;localStorage.removeItem(APP_KEY);localStorage.removeItem(CHECK_KEY);state=blankState();render();toast("Alles gelöscht")}
+function notebook(){
+  const unpaid=state.orders.filter(o=>!paid(o));
+  const prod=state.orders.filter(prodOpen);
+  const ship=state.orders.filter(shipOpen);
+  return `HP67 AUFTRAGSÜBERSICHT
+Stand: ${new Date().toLocaleString("de-DE")}
+
+GESAMT
+- Aufträge gesamt: ${state.orders.length}
+- Nicht bezahlt/angezahlt: ${unpaid.length}
+- Produktion offen: ${prod.length}
+- Bezahlt, fertig, nicht verschickt: ${ship.length}
+- Umsatz eingetragen gesamt: ${money(state.orders.reduce((a,o)=>a+(Number(o.price)||0),0))}
+
+OFFENE ZAHLUNGEN
+${unpaid.map(o=>`- ${o.customer||"Ohne Kunde"} | ${o.product||"Ohne Produkt"} | ${money(o.price)} | ${o.pay}`).join("\n")||"- keine"}
+
+PRODUKTION OFFEN
+${prod.map(o=>`- ${o.customer||"Ohne Kunde"} | ${o.product||"Ohne Produkt"} | ${o.prod} | Material: ${o.material||"-"}`).join("\n")||"- keine"}
+
+VERSAND / ÜBERGABE OFFEN
+${ship.map(o=>`- ${o.customer||"Ohne Kunde"} | ${o.product||"Ohne Produkt"} | ${o.ship} | Tracking: ${o.tracking||"-"}`).join("\n")||"- keine"}
+
+ALLE AUFTRÄGE
+${state.orders.map(o=>`- ${deDate(o.date)} | ${o.customer||"Ohne Kunde"} | ${o.product||"Ohne Produkt"} | ${o.variant||"-"} | ${money(o.price)} | Zahlung: ${o.pay} | Produktion: ${o.prod} | Versand: ${o.ship} | Notiz: ${o.notes||"-"}`).join("\n")||"- keine"}`;
+}
+function copyNotebook(){
+  const t=document.getElementById("notebookText");
+  t.value=notebook();
+  t.select();
+  document.execCommand("copy");
+  toast("NotebookLM Text kopiert");
+}
+
+function render(){
+  document.getElementById("todayBadge").textContent=new Date().toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"2-digit"});
+  document.getElementById("kTotal").textContent=state.orders.length;
+  document.getElementById("kUnpaid").textContent=state.orders.filter(o=>!paid(o)).length;
+  document.getElementById("kProduction").textContent=state.orders.filter(prodOpen).length;
+  document.getElementById("kShip").textContent=state.orders.filter(shipOpen).length;
+  renderChecks("dailyChecks","daily");
+  const urgent=state.orders.filter(o=>!done(o)).sort((a,b)=>prioScore(a)-prioScore(b)||dueTime(a)-dueTime(b)).slice(0,6);
+  document.getElementById("urgentList").innerHTML=urgent.map(orderCard).join("")||'<div class="empty">Aktuell nichts Dringendes offen.</div>';
+  const fo=filteredOrders();
+  document.getElementById("ordersList").innerHTML=fo.map(orderCard).join("")||'<div class="empty">Keine Aufträge gefunden.</div>';
+  renderModuleGrid();
+  const nt=document.getElementById("notebookText"); if(nt)nt.value=notebook();
+}
+render();
+</script>
+</body>
+</html>

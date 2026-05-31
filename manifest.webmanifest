@@ -1,0 +1,15 @@
+{
+  "name": "HP67 AuftragsApp",
+  "short_name": "HP67 Aufträge",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f3f4f8",
+  "theme_color": "#e50914",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
