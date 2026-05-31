@@ -1,8 +1,11 @@
 {
   "name": "HP67 AuftragsApp",
   "short_name": "HP67 Aufträge",
+  "description": "Professionelle Auftragsverwaltung für Druck & Merchandise",
+  "categories": ["business", "productivity"],
   "start_url": "./index.html",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#f3f4f8",
   "theme_color": "#e50914",
   "icons": [
@@ -10,6 +13,22 @@
       "src": "icon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Neuer Auftrag",
+      "short_name": "Neu",
+      "description": "Einen neuen Auftrag erstellen",
+      "url": "./index.html?action=new",
+      "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Aufträge durchsuchen",
+      "short_name": "Suche",
+      "description": "Bestehende Aufträge durchsuchen",
+      "url": "./index.html?action=search",
+      "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }]
     }
   ]
 }
